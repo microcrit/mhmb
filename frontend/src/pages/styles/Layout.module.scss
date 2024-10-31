@@ -1,0 +1,29 @@
+.background {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-image: linear-gradient(120deg, 
+        rgba(0, 0, 0, 0.1) 10%, 
+        rgba(0, 255, 255, 0.2) 20%,
+        rgba(0, 0, 0, 0.1) 30%, 
+        rgba(0, 0, 0, 0.1) 50%, 
+        rgba(255, 0, 255, 0.2) 60%, 
+        rgba(0, 0, 0, 0.1) 80%, 
+        rgba(0, 255, 255, 0.2) 90%, 
+        rgba(0, 0, 0, 0.1) 100%
+    );
+    background-size: 200% 200%;
+    animation: background 10s linear infinite;
+    overflow: hidden;
+}
+
+@keyframes background {
+    0% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: 100% 0%;
+    }
+}

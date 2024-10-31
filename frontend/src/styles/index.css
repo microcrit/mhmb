@@ -1,0 +1,48 @@
+:root {
+  --background-color-primary: #292929;
+  --foreground-color-primary: #ffffff;
+
+  --background-color-secondary: #303030;
+  --foreground-color-secondary: #dbdbdb;
+
+  --accent-color: #73ffbb;
+  --border-color: #9bffcf;
+
+  color-scheme: dark light;
+
+  background-color: var(--background-color-primary);
+  color: var(--foreground-color-primary);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --background-color: #ffffff;
+    --foreground-color: #292929;
+    --accent-color: #73ffbb;
+    --border-color: #52ffab;
+  }
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 100vw;
+  min-height: 100vh;
+}
+
+body::-webkit-scrollbar-track {
+  background-color: var(--background-color-secondary);
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: var(--foreground-color-secondary);
+  border-radius: 10px;
+}
+
+body::-webkit-scrollbar {
+  width: 10px;
+}
