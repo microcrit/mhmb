@@ -2,12 +2,21 @@
   "name": "backend",
   "version": "1.0.50",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "bun run src/index.ts",
+    "dev": "NODE_ENV=development bun run src/index.ts --watch"
   },
   "dependencies": {
     "@elysiajs/static": "^1.1.1",
+    "@lucia-auth/adapter-sqlite": "^3.0.2",
+    "@mikro-orm/better-sqlite": "^6.3.13",
+    "@mikro-orm/core": "^6.3.13",
+    "@mikro-orm/reflection": "^6.3.13",
     "@ptkdev/logger": "^1.8.0",
+    "@types/better-sqlite3": "^7.6.11",
+    "better-sqlite3": "^11.5.0",
     "elysia": "latest",
+    "lucia": "^3.2.2",
     "node-watch": "^0.7.4"
   },
   "devDependencies": {

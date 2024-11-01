@@ -3,9 +3,10 @@ import { staticPlugin } from "@elysiajs/static";
 
 import Logger from "@ptkdev/logger";
 
-import { Database } from "bun:sqlite";
+import { MikroORM, RequestContext, Utils, wrap } from '@mikro-orm/better-sqlite';
+import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 
-import ApiGroup from "./groups/ApiGroup";
+import ApiGroup from "./groups/api";
 
 import ServiceThroughput from "./types/ServiceThrough";
 
@@ -20,6 +21,12 @@ import watch from "node-watch";
 import loadConfig from "./utils/confLoad";
 import { spawnSync } from "child_process";
 
+import { Lucia } from "lucia";
+import { BetterSqlite3Adapter } from "@lucia-auth/adapter-sqlite";
+import sqlite from "better-sqlite3";
+
+import { getConfig, setConfig } from "./stores/ConfigStore";
+
 let __dirname = dirname(fileURLToPath(import.meta.url));
 
 if (os.platform() == "win32") {
@@ -31,6 +38,7 @@ const configRoot = path.join(__dirname, "..", "..", "config.json");
 const logger = new Logger();
 
 const config = await loadConfig(configRoot, logger);
+setConfig(config);
 
 const dbRoot = path.join(__dirname, "..", "..", config.database?.file_name || "db.sqlite");
 
@@ -42,17 +50,6 @@ if (process.env.NODE_ENV == "development") {
     logger.warning("`db.sqlite` does not exist in project root already and will have to be created.")
 }
 
-const through: ServiceThroughput = {
-  config,
-  database: new Database(dbRoot, {
-    strict: config.database?.strict || false,
-    safeIntegers: config.database?.strict || false,
-    readwrite: true,
-    create: true
-  }),
-  logger
-};
-
 const frontendRoot = path.join(__dirname, "..", "..", "frontend");
 
 async function buildVite() {
@@ -62,7 +59,7 @@ async function buildVite() {
     cwd: frontendRoot,
     stdio: "pipe"
   });
-  
+
   if (r.status != 0) {
     logger.error(" ~> Failed to build frontend");
     logger.error(r.stderr.toString());
@@ -76,9 +73,30 @@ if (!fs.existsSync(path.join(frontendRoot, "dist"))) {
   await buildVite();
 }
 
-const app = new Elysia({
+const sessionDbRoot = path.join(__dirname, "..", "..", path.basename(config.database?.file_name || "db") + "_session.db");
+
+const auth = new Lucia(new BetterSqlite3Adapter(sqlite(sessionDbRoot), {
+  user: "users",
+  session: "sessions"
+}));
+
+const orm = await MikroORM.init({
+  metadataProvider: TsMorphMetadataProvider,
+  entitiesTs: [path.join(__dirname, "entities")],
+  dbName: 'mhmb'
+});
+
+const through: ServiceThroughput = {
+  config,
+  logger,
+  auth
+};
+
+new Elysia({
   name: config.meta.application
 })
+  .on("beforeHandle", () => RequestContext.enter(orm.em))
+  .on("afterHandle", ({ response }) => Utils.isEntity(response) ? wrap(response).toObject() : response)
   .use(staticPlugin({
     prefix: "/",
     assets: path.join(frontendRoot, "dist"),

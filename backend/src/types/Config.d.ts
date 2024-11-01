@@ -1,3 +1,5 @@
+import { Permission } from "./internal/Permission";
+
 export default interface Config {
     meta: {
         application: string;
@@ -8,6 +10,13 @@ export default interface Config {
         hostname?: string;
         port?: number;
     };
+
+    users?: {
+        roles: Record<string, Permission[]>;
+        sessions?: {
+            expiryMinutes?: number;
+        };
+    }
 
     database?: {
         file_name?: string;
